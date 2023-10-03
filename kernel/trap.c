@@ -49,6 +49,8 @@ usertrap(void)
   
   // save user program counter.
   p->trapframe->epc = r_sepc();
+  // increment cpu time
+  p->cputime++;
   
   if(r_scause() == 8){
     // system call
@@ -148,6 +150,8 @@ kerneltrap()
     printf("sepc=%p stval=%p\n", r_sepc(), r_stval());
     panic("kerneltrap");
   }
+  
+  p->cputime++;
 
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2 && myproc() != 0 && myproc()->state == RUNNING)

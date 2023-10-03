@@ -106,6 +106,7 @@ static struct proc*
 allocproc(void)
 {
   struct proc *p;
+  p->cputime = 0;
 
   for(p = proc; p < &proc[NPROC]; p++) {
     acquire(&p->lock);
