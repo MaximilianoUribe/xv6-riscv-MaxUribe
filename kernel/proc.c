@@ -503,24 +503,16 @@ struct proc *p;
       for(p = proc; p < &proc[NPROC]; p++) {
          acquire(&p->lock);
          if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
            p->readytime = sys_uptime();
-
            p->state = RUNNING;
            c->proc = p;
            swtch(&c->context, &p->context);
-
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
            c->proc = 0;
          }
       }
       release(&p->lock);
     } else if(DEFSCHED == PRIORITY){
       // Keep track of highest priority and the process
-      //int highest_pr = 0;
       struct proc *max_proc;
       max_proc = 0;
       int max_p_age = 0;
@@ -528,16 +520,12 @@ struct proc *p;
 	int age = sys_uptime() - p->readytime;
         int priority_age = p->priority + age;
 	acquire(&p->lock);
-	//aqui?
 	if (p->state == RUNNABLE && priority_age > max_p_age) {
-	  //highest_pr = p->priority;
           max_p_age = priority_age;
 	  max_proc = p;
-
 	}
 	release(&p->lock);
       }
-
       if (max_proc){
 	acquire(&max_proc->lock);
 	if (max_proc->state == RUNNABLE){
