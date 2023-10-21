@@ -92,6 +92,7 @@ struct proc {
   int pid;                     // Process ID
   int cputime;	               // How much CPU time is taking
   int priority;                //priority for the scheduler
+  uint64 readytime;	       //ready time
   // wait_lock must be held when using this:
   struct proc *parent;         // Parent process
 

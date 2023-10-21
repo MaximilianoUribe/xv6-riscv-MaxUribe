@@ -140,6 +140,7 @@ UPROGS=\
 	$U/_time1\
 	$U/_matmul\
 	$U/_time\
+	$U/_pexec\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

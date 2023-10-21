@@ -128,17 +128,13 @@ sys_getpriority(void)
 uint64
 sys_setpriority(void)
 {
-  int current_priority;
+  int new_priority;
 
-  if(argint(0, &current_priority)<0)
-  {
+  if(argint(0, &new_priority)<0)
     return -1;
-  }
-  if(current_priority<0 || current_priority>99)
-  {
+  if(new_priority<0 || new_priority>99)
     return -1;
-  }
-  myproc()->priority = current_priority;
+  myproc()->priority = new_priority;
   return 0;
 }
 	

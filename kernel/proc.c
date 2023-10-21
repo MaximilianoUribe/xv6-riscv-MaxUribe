@@ -19,6 +19,8 @@ struct spinlock pid_lock;
 extern void forkret(void);
 static void freeproc(struct proc *p);
 
+int scheduletype = SCHEDULETYPE;
+
 extern char trampoline[]; // trampoline.S
 
 // helps ensure that wakeups of wait()ing
@@ -491,33 +493,67 @@ wait2(uint64 addr, uint64 addr2)
 void
 scheduler(void)
 {
-  struct proc *p;
+struct proc *p;
   struct cpu *c = mycpu();
-  
   c->proc = 0;
   for(;;){
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
-
-    for(p = proc; p < &proc[NPROC]; p++) {
-      acquire(&p->lock);
-      if(p->state == RUNNABLE) {
+    if (DEFSCHED == ROUNDROBIN) {
+      for(p = proc; p < &proc[NPROC]; p++) {
+         acquire(&p->lock);
+         if(p->state == RUNNABLE) {
         // Switch to chosen process.  It is the process's job
         // to release its lock and then reacquire it
         // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
+           p->readytime = sys_uptime();
+
+           p->state = RUNNING;
+           c->proc = p;
+           swtch(&c->context, &p->context);
 
         // Process is done running for now.
         // It should have changed its p->state before coming back.
-        c->proc = 0;
+           c->proc = 0;
+         }
       }
       release(&p->lock);
+    } else if(DEFSCHED == PRIORITY){
+      // Keep track of highest priority and the process
+      //int highest_pr = 0;
+      struct proc *max_proc;
+      max_proc = 0;
+      int max_p_age = 0;
+      for(p = proc; p < &proc[NPROC]; p++){
+	int age = sys_uptime() - p->readytime;
+        int priority_age = p->priority + age;
+	acquire(&p->lock);
+	//aqui?
+	if (p->state == RUNNABLE && priority_age > max_p_age) {
+	  //highest_pr = p->priority;
+          max_p_age = priority_age;
+	  max_proc = p;
+
+	}
+	release(&p->lock);
+      }
+
+      if (max_proc){
+	acquire(&max_proc->lock);
+	if (max_proc->state == RUNNABLE){
+	  max_proc->readytime = sys_uptime();
+	  max_proc->state = RUNNING;
+	  c->proc = max_proc;
+	  swtch(&c->context, &max_proc->context);
+	  c->proc = 0;
+	  release(&max_proc->lock);
+	} else {
+	  release(&max_proc->lock);
+	}
+      }
     }
   }
 }
-
 // Switch to scheduler.  Must hold only p->lock
 // and have changed proc->state. Saves and restores
 // intena because intena is a property of this
