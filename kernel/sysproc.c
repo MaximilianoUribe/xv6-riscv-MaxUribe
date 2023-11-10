@@ -137,4 +137,9 @@ sys_setpriority(void)
   myproc()->priority = new_priority;
   return 0;
 }
-	
+uint64 
+sys_freepmem(void){
+  int res = freepmem();
+  return res;
+}
+
