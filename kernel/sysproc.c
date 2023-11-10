@@ -55,13 +55,19 @@ sys_sbrk(void)
 {
   int addr;
   int n;
+  int sz2;
+
+  struct proc *p = myproc();
 
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
-  if(growproc(n) < 0)
-    return -1;
-  return addr;
+  sz2 = addr + n;
+  if(sz2<TRAPFRAME){
+    p->sz = sz2;
+    return addr;
+  }
+  return -1;
 }
 
 uint64

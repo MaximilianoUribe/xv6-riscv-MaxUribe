@@ -108,6 +108,7 @@ void            procdump(void);
 int             procinfo(uint64);
 uint64          sys_uptime(void);
 int             freepmem(void);
+
 // swtch.S
 void            swtch(struct context*, struct context*);
 
