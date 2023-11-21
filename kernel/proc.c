@@ -238,6 +238,8 @@ userinit(void)
   p = allocproc();
   initproc = p;
   
+  p->cur_max = MAXVA -  2*PGSIZE;
+
   // allocate one user page and copy init's instructions
   // and data into it.
   uvminit(p->pagetable, initcode, sizeof(initcode));
