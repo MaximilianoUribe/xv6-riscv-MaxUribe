@@ -108,6 +108,10 @@ void            procdump(void);
 int             procinfo(uint64);
 uint64          sys_uptime(void);
 int             freepmem(void);
+struct mmr_list* get_mmr_list(int);
+int alloc_mmr_listid(void);
+void dealloc_mmr_listid(int);
+void mmrlistinit(void);
 
 // swtch.S
 void            swtch(struct context*, struct context*);

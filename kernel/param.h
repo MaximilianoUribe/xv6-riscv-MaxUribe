@@ -16,5 +16,6 @@
 #define DEFSCHED     PRIORITY
 #define MAXEFFPRIORITY 99
 #define SCHEDULETYPE     PRIORITY
+#define MAX_MMR 10 // maximum number of memory-mapped regions per process
 
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
