@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "pstat.h"
 #include "defs.h"
+#include "stats.h"
 
 struct cpu cpus[NCPU];
 
@@ -126,7 +127,6 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
-  p->cputime = 0;
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
@@ -161,6 +161,31 @@ freeproc(struct proc *p)
   if(p->trapframe)
     kfree((void*)p->trapframe);
   p->trapframe = 0;
+
+  for (int i = 0; i < MAX_MMR; i++) {
+	int dofree = 0;
+	if (p->mmr[i].valid == 1) {
+	  if (p->mmr[i].flags & MAP_PRIVATE)
+	    dofree = 1;
+	else { // MAP_SHARED
+	  acquire(&mmr_list[p->mmr[i].mmr_family.listid].lock);
+	if (p->mmr[i].mmr_family.next == &(p->mmr[i].mmr_family)) { // no other family members
+	  dofree = 1;
+	release(&mmr_list[p->mmr[i].mmr_family.listid].lock);
+	dealloc_mmr_listid(p->mmr[i].mmr_family.listid);
+
+  } else { // remove p from mmr family
+	(p->mmr[i].mmr_family.next)->prev = p->mmr[i].mmr_family.prev;
+	(p->mmr[i].mmr_family.prev)->next = p->mmr[i].mmr_family.next;
+	release(&mmr_list[p->mmr[i].mmr_family.listid].lock);
+  }
+  }
+  for (uint64 addr = p->mmr[i].addr; addr < p->mmr[i].addr + p->mmr[i].length; addr += PGSIZE)
+    if (walkaddr(p->pagetable, addr))
+	uvmunmap(p->pagetable, addr, 1, dofree);
+	}
+  }
+
   if(p->pagetable)
     proc_freepagetable(p->pagetable, p->sz);
   p->pagetable = 0;
@@ -238,7 +263,6 @@ userinit(void)
   p = allocproc();
   initproc = p;
   
-  p->cur_max = MAXVA -  2*PGSIZE;
 
   // allocate one user page and copy init's instructions
   // and data into it.
@@ -253,6 +277,8 @@ userinit(void)
   p->cwd = namei("/");
 
   p->state = RUNNABLE;
+
+  p->cur_max = MAXVA - 2*PGSIZE;
 
   release(&p->lock);
 }
@@ -292,12 +318,14 @@ fork(void)
   }
 
   // Copy user memory from parent to child.
-  if(uvmcopy(p->pagetable, np->pagetable, p->sz) < 0){
+  if(uvmcopy(p->pagetable, np->pagetable,0 , p->sz) < 0){
     freeproc(np);
     release(&np->lock);
     return -1;
   }
   np->sz = p->sz;
+
+  np->cur_max = p->cur_max;
 
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
