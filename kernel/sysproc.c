@@ -39,33 +39,23 @@ sys_wait(void)
 }
 
 uint64
-sys_wait2(void)
-{
-  uint64 p;
-  uint64 np;
-  if(argaddr(0, &p) < 0)
-    return -1;
-  if(argaddr(1, &np) < 0)
-    return -1;
-  return wait2(p, np);
-}
-
-uint64
 sys_sbrk(void)
 {
   int addr;
   int n;
-  int sz2;
-
-  struct proc *p = myproc();
 
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
-  sz2 = addr + n;
-  if(sz2<TRAPFRAME){
-    p->sz = sz2;
-    return addr;
+  
+  //if(growproc(n) < 0)
+    //return -1;
+
+  int newsz = addr + n;
+  if(newsz < TRAPFRAME){
+  	//allocate more virtual mem
+  	myproc()->sz = newsz;
+  	return addr;
   }
   return -1;
 }
@@ -125,27 +115,3 @@ sys_getprocs(void)
     return -1;
   return(procinfo(addr));
 }
-uint64
-sys_getpriority(void)
-{
-  return myproc()->priority;
-}
-
-uint64
-sys_setpriority(void)
-{
-  int new_priority;
-
-  if(argint(0, &new_priority)<0)
-    return -1;
-  if(new_priority<0 || new_priority>99)
-    return -1;
-  myproc()->priority = new_priority;
-  return 0;
-}
-uint64 
-sys_freepmem(void){
-  int res = freepmem();
-  return res;
-}
-

@@ -14,8 +14,7 @@ sub entry {
     print " ecall\n";
     print " ret\n";
 }
-
-entry("wait2");
+	
 entry("fork");
 entry("exit");
 entry("wait");
@@ -38,6 +37,6 @@ entry("sbrk");
 entry("sleep");
 entry("uptime");
 entry("getprocs");
-entry("setpriority");
-entry("getpriority");
 entry("freepmem");
+entry("mmap");
+entry("munmap");

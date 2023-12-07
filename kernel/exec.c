@@ -9,7 +9,6 @@
 
 static int loadseg(pde_t *pgdir, uint64 addr, struct inode *ip, uint offset, uint sz);
 
-
 char* print_prefix(int level) {
   if (level == 2) {
     return "..";
@@ -41,6 +40,7 @@ void vmprint(pagetable_t pagetable)
   printf("page table %p\n", pagetable);
   vmprint_helper(pagetable, " ..", 2);
 }
+
 
 int
 exec(char *path, char **argv)

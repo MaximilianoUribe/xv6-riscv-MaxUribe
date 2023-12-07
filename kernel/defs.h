@@ -16,7 +16,6 @@ void            brelse(struct buf*);
 void            bwrite(struct buf*);
 void            bpin(struct buf*);
 void            bunpin(struct buf*);
-int             freeCount(void);
 
 // console.c
 void            consoleinit(void);
@@ -64,6 +63,7 @@ void            ramdiskrw(struct buf*);
 void*           kalloc(void);
 void            kfree(void *);
 void            kinit(void);
+int 		freeCount(void);
 
 // log.c
 void            initlog(int, struct superblock*);
@@ -106,6 +106,7 @@ int             either_copyout(int user_dst, uint64 dst, void *src, uint64 len);
 int             either_copyin(void *dst, int user_src, uint64 src, uint64 len);
 void            procdump(void);
 int             procinfo(uint64);
+//HMW5---------------------------
 struct mmr_list* get_mmr_list(int);
 int alloc_mmr_listid(void);
 void dealloc_mmr_listid(int);
@@ -176,9 +177,9 @@ uint64          walkaddr(pagetable_t, uint64);
 int             copyout(pagetable_t, uint64, char *, uint64);
 int             copyin(pagetable_t, char *, uint64, uint64);
 int             copyinstr(pagetable_t, char *, uint64, uint64);
-int             mapvpages(pagetable_t, uint64, uint64);
-int	        uvmcopy(pagetable_t, pagetable_t, uint64, uint64);
-int		uvmcopyshared(pagetable_t, pagetable_t, uint64, uint64);
+int		        mapvpages(pagetable_t, uint64, uint64);
+int		        uvmcopy(pagetable_t, pagetable_t, uint64, uint64);
+int		        uvmcopyshared(pagetable_t, pagetable_t, uint64, uint64);
 
 // plic.c
 void            plicinit(void);
